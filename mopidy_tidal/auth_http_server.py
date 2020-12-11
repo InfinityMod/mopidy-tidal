@@ -57,11 +57,11 @@ class HTTPHandler(BaseHTTPRequestHandler, object):
         code_verifier, authorization_url = self.session.login_part1()
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(HTML_BODY(authurl=authorization_url, usrkey=code_verifier))
+        self.wfile.write(HTML_BODY(authurl=authorization_url, usrkey=code_verifier).encode())
 
     @catch
     def do_POST(self):
-        content_length = int(self.headers.getheader('content-length', 0))
+        content_length = int(self.headers.get('Content-Length'))
         body = self.rfile.read(content_length)
         try:
             form = {k: v for k, v in (p.split("=", 1) for p in body.split("&"))}
@@ -70,16 +70,16 @@ class HTTPHandler(BaseHTTPRequestHandler, object):
         except:
             self.send_response(400)
             self.end_headers()
-            self.wfile.write("Malformed request")
+            self.wfile.write("Malformed request".encode())
             raise
         else:
             try:
                 self.session.login_part2(usr_key, code_url)
                 self.send_response(200)
                 self.end_headers()
-                self.wfile.write("Success!\nCredentials auto-refresh is on.\nEnjoy your music!")
+                self.wfile.write("Success!\nCredentials auto-refresh is on.\nEnjoy your music!".encode())
             except:
                 self.send_response(401)
                 self.end_headers()
-                self.wfile.write("Failed to get final key! :(")
+                self.wfile.write("Failed to get final key! :(".encode())
                 raise
